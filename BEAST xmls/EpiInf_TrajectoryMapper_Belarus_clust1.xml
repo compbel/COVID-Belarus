@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beast version='2.0' namespace="beast.core
+                  :beast.core.parameter
+				  :beast.evolution.operators
+                  :beast.evolution.tree
+				  :feast
+                  :feast.expressions
+                  :feast.fileio.logfileiterator">
+
+  <run spec="LogFileIterator">
+    <logFileState spec="TraceLogFileState" logFileName="results_Bel_epiinf_changetimeprior_linked_41\Results\sample-belarus-date_clust1.log">
+      <logFileEntry spec="LogFileRealParameter" fieldName="reproductiveNumber_BDSKY_Serial.11">
+        <fieldParameter id="Re" spec="RealParameter" value="0.0"/>
+      </logFileEntry>
+
+      <logFileEntry spec="LogFileRealParameter" fieldName="samplingProportion_BDSKY_Serial.11">
+        <fieldParameter id="sampProp" spec="RealParameter" value="0.0"/>
+      </logFileEntry>
+    </logFileState>
+
+    <logFileState spec="TreeLogFileState" logFileName="results_Bel_epiinf_changetimeprior_linked_41\Results\sample-belarus-date_clust1.trees">
+      <tree spec="beast.evolution.tree.Tree" id="tree"/>
+    </logFileState>
+
+    <logger spec="Logger"
+            logEvery="10000">
+      <log idref="Re"/>
+      <log idref="sampProp"/>
+      <log id="treestat" spec="TreeStatLogger" tree="@tree"/>
+      <log idref="infectionRate"/>
+      <log idref="recoveryRate"/>
+    </logger>
+
+    <logger spec="Logger"
+            fileName="Results/sample-belarus-date_clust1.traj"
+            logEvery="10000">
+      <log spec="epiinf.TrajectoryLogger"
+           logMostRecentTrajectory="true">
+        <treeDensity id="treePrior" spec="epiinf.distribs.SMCTreeDensity"
+                     tree="@tree"
+                     nParticles="100"
+                     useTauLeaping="true">
+          
+          <model spec="epiinf.models.BirthDeathModel"
+                 infectionRateShiftTimesBackward="true"
+                 origin="0.89"
+                 psiSamplingVariable="@sampProp"
+                 psiSamplingVariableShiftTimesBackward="true"
+                 rhoSamplingTimesBackward="true"
+                 usePsiSamplingProportion="true">
+
+            <infectionRate id="infectionRate"
+                           spec="ExpCalculator"
+                           value="$36.5*Re">
+              <arg idref="Re"/>
+            </infectionRate>
+
+            <recoveryRate id="recoveryRate"
+                          spec="ExpCalculator"
+                           value="$36.5*(1-sampProp)">
+              <arg idref="sampProp"/>
+            </recoveryRate>
+            
+            <removalProb spec="parameter.RealParameter" value="1" estimate="false"/>
+            <rhoSamplingProb spec="parameter.RealParameter" value="0.0" estimate="false"/>
+            <rhoSamplingTime spec="parameter.RealParameter" value="0.0" estimate="false"/>
+          </model>
+          
+          <finalTreeSampleOffset spec="parameter.RealParameter" value="0.0" estimate="false"/>
+        </treeDensity>
+      </log>
+    </logger>
+  </run>
+</beast>
